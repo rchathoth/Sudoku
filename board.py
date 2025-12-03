@@ -22,8 +22,11 @@ class Board:
         generator.remove_cells()
         self.board = [row[:] for row in generator.get_board()]
         self.model = [row[:] for row in self.board]
+        self.original_board = [row[:] for row in self.board]
+        self.rows = 9
+        self.cols = 9
 
-        #rest of init is pasted from notes
+   
 
         self.cells = []
         cell_size = min(width // 9, height // 9)
@@ -52,6 +55,15 @@ class Board:
         for i in range(1,9):
             pygame.draw.line(self.screen, "black", (i*cell_size, 0), (i*cell_size, self.width), 4)
             pygame.draw.line(self.screen, "black", (0, i*cell_size), (self.height, i*cell_size), 4)
+
+        for r in range(self.rows):
+            for c in range(self.cols):
+                cell = self.cells[r][c]
+                if self.selected == (r, c):
+                    cell.selected = True
+                else:
+                    cell.selected = False
+                cell.draw()
     
     def select(self, row, col):
         self.selected = (row, col)    
@@ -114,7 +126,7 @@ class Board:
         # Check 3x3 boxes
         for i in range(0, self.rows, 3):
             for j in range(0, self.cols, 3):
-                box = [self.board[x][y] for x in range(i + 3) for y in range(j + 3)]
+                box = [self.board[x][y] for x in range(i, i + 3) for y in range(j, j + 3)]
                 if sorted(box) != [1, 2, 3, 4, 5, 6, 7, 8, 9]:
                     return False
         

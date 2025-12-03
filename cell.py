@@ -7,6 +7,7 @@ class Cell:
         self.col = col
         self.screen = screen
         self.sketched_value = 0
+        self.selected = False
     
     def set_cell(self, value):
         self.value = value

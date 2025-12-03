@@ -5,29 +5,6 @@ from sudoku_generator import generate_sudoku
 
 pygame.init()
 
-'''
-FLOW OF THIS FILE:
-Initialize Pygame - done
-  ↓
-start_screen() [LOOP: wait for difficulty selection]
-  ↓
-difficulty selected
-  ↓
-Create Board(difficulty)
-  ↓
-Main Game Loop [LOOP: handle events, draw, check win]
-  ├─ Handle mouse/keyboard
-  ├─ Update board
-  ├─ Draw everything
-  └─ Check if won?
-       ↓ (if won)
-Game Over Screen
-  ↓
-Restart or Exit?
-  ↓
-END
-'''
-
 # CONSTANTS
 WIDTH, HEIGHT = 540, 600
 WHITE = (255, 255, 255)
@@ -151,18 +128,27 @@ def main():
                         playing = False
                         running = False
                     else:
-                        # Click inside board area
+                        # Click inside board area -> compute row/col from mouse coords
                         if my < board_height:
-                            clicked = board.click(mx, my)
-                            if clicked:
-                                r, c = clicked
-                                board.select(r, c)
+                            # get cell size from board (set in Board.__init__)
+                            try:
+                                cell_size = board.cells[0][0].size
+                            except Exception:
+                                cell_size = min(WIDTH // 9, board_height // 9)
+                            col = mx // cell_size
+                            row = my // cell_size
+                            if 0 <= row < board.rows and 0 <= col < board.cols:
+                                board.select(row, col)
+
 
                 elif event.type == pygame.KEYDOWN:
-                    # Number keys 1–9: sketch value
+                    # Number keys 1–9: sketch value (store as sketched_value on the selected cell)
                     if pygame.K_1 <= event.key <= pygame.K_9:
                         num = event.key - pygame.K_0
-                        board.sketch(num)
+                        if board.selected:
+                            r, c = board.selected
+                            if board.editable[r][c]:
+                                board.cells[r][c].sketched_value = num
 
                     # Enter: commit sketched value
                     elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
@@ -172,19 +158,30 @@ def main():
                             if cell.sketched_value != 0:
                                 board.place_number(cell.sketched_value)
 
-                    # Delete / Backspace: clear selected cell
+                    # Delete / Backspace: clear selected cell (only if editable)
                     elif event.key in (pygame.K_BACKSPACE, pygame.K_DELETE):
-                        board.clear()
+                        if board.selected:
+                            r, c = board.selected
+                            if board.editable[r][c]:
+                                board.cells[r][c].value = 0
+                                board.cells[r][c].sketched_value = 0
+                                board.update_board()
 
-                    # Arrow keys: move selection
-                    elif event.key == pygame.K_UP:
-                        board.move_selection("up")
-                    elif event.key == pygame.K_DOWN:
-                        board.move_selection("down")
-                    elif event.key == pygame.K_LEFT:
-                        board.move_selection("left")
-                    elif event.key == pygame.K_RIGHT:
-                        board.move_selection("right")
+                    # Arrow keys: move selection (wrap/clamp within bounds)
+                    elif event.key in (pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT):
+                        if not board.selected:
+                            board.select(0, 0)
+                        else:
+                            r, c = board.selected
+                            if event.key == pygame.K_UP:
+                                r = max(0, r - 1)
+                            elif event.key == pygame.K_DOWN:
+                                r = min(board.rows - 1, r + 1)
+                            elif event.key == pygame.K_LEFT:
+                                c = max(0, c - 1)
+                            elif event.key == pygame.K_RIGHT:
+                                c = min(board.cols - 1, c + 1)
+                            board.select(r, c)
 
             # After events: check win/lose once board is full
             if playing and board.is_full():
