@@ -31,22 +31,20 @@ class SudokuGenerator:
                 return False
         return True
 
-
     def valid_in_box(self, row_start, col_start, num):
         for r in range(row_start, row_start + self.box_length):
             for c in range(col_start, col_start + self.box_length):
                 if self.board[r][c] == num:
                     return False
-                return True
-            
+        return True
+
     def is_valid(self, row, col, num):
-        row_start = row//3 * 3
-        col_start = col//3 * 3
+        row_start = (row // self.box_length) * self.box_length
+        col_start = (col // self.box_length) * self.box_length
         if self.valid_in_row(row, num) and self.valid_in_col(col, num) and self.valid_in_box(row_start, col_start, num):
             return True
         else:
             return False
-
 
     def fill_box(self, row_start, col_start):
         nums = list(range(1, self.row_length + 1))
@@ -56,8 +54,6 @@ class SudokuGenerator:
             for c in range(col_start, col_start + self.box_length):
                 self.board[r][c] = nums[index]
                 index += 1
-
-
     def fill_diagonal(self):
         for i in range(0, self.row_length, self.box_length):
             self.fill_box(i, i)
