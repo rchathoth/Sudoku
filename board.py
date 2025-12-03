@@ -41,9 +41,6 @@ class Board:
         # Track which cells are editable (not pre-filled)
         self.editable = [[self.board[row][col] == 0 for col in range(9)] for row in range(9)]
     
-
-
-    
     def draw(self):
         box_size = int(self.width // 3)
         cell_size = box_size // 3
@@ -58,7 +55,6 @@ class Board:
     
     def select(self, row, col):
         self.selected = (row, col)    
-
 
     def place_number(self, value):
         # Sets the value of the current selected cell equal to the user entered value. 
