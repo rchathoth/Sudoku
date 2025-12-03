@@ -203,7 +203,7 @@ def game_over(screen, won):
     if won:
         title = big_font.render("You Win!", True, (0, 150, 0))
     else:
-        title = big_font.render("Game Over", True, (200, 0, 0))
+        title = big_font.render("You Lose!", True, (200, 0, 0))
 
     subtitle = small_font.render("Press R to restart or Q to quit", True, BLACK)
 
